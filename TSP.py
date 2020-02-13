@@ -132,7 +132,7 @@ def listCrossover(chromosomeList):
     crossList.append(chromosomeList[len(chromosomeList)-1])
     return crossList
 
-def mutateGroup(chromosomeList, fitnessList):
+def mutateGroup(chromosomeList, fitnessList, amount):
     
     totDist = 0;
     mutateList = []
@@ -141,7 +141,7 @@ def mutateGroup(chromosomeList, fitnessList):
         totDist += 1/fitness
         
     for c in range(len(chromosomeList)):
-        if((1/fitnessList[c])/totDist >= 2*randrange(math.floor(1000))/1000):
+        if((amount/fitnessList[c]) >= randrange(math.floor(1000))/1000):
             mutateList.append(mutation(chromosomeList[c]))
         
         mutateList.append(chromosomeList[c])
@@ -206,14 +206,21 @@ filename = askopenfilename() # show an "Open" dialog box and return the path to 
 dataset = open(filename, "r")
 parsedDataset = parseDataset(dataset)
 
-chromosomeList = generateChromosomes(parsedDataset, 10000)
+chromosomeList = generateChromosomes(parsedDataset, 1000)
 
 evolve = 1
 
+bestChromosomeBefore = 0
+bestChromosomeAfter = 0
+amount = 0
+cumulateSaved = 0
+
 while(evolve):
+    delta = -bestChromosomeBefore+bestChromosomeAfter
+
     numberBefore = len(chromosomeList)
     fitnessList = generateFitnessList(chromosomeList, parsedDataset)
-    chromosomeList = mutateGroup(chromosomeList, fitnessList)
+    chromosomeList = mutateGroup(chromosomeList, fitnessList, amount)
     fitnessList = generateFitnessList(chromosomeList, parsedDataset)
 
 #    print(len(chromosomeList))
@@ -226,9 +233,18 @@ while(evolve):
 ##    chromosomeList = set(chromosomeList) ^ set(killList)
     
     bestChromosomes = extractBestN(chromosomeList, fitnessList, math.ceil(len(chromosomeList)/1))
+    
+    bestChromosomeBefore = bestChromosomeAfter
+    bestChromosomeAfter = 1/fitness(bestChromosomes[0], parsedDataset)
+    amount = 100*math.exp(10*(-delta)/(bestChromosomeBefore+1))
+    
 
+#    print("AMOUNT: " + str(amount) + " ... DELTA " + str(-bestChromosomeBefore+bestChromosomeAfter))
+#    print(amount)
+#    amount = 100000/(bestChromosomeAfter - bestChromosomeBefore + 1)
     
     print(1/fitness(bestChromosomes[0], parsedDataset))
+    
 #    print(bestChromosomes[0])
     
 #    threshold = calculateThreshold(fitnessList)
@@ -243,7 +259,14 @@ while(evolve):
 #    mixedBestChromosomes = mixList(bestChromosomes)
     chromosomeList = listCrossover(chromosomeList)  
     numberAfter = len(chromosomeList)
-    chromosomeList = killNWeakest(chromosomeList, parsedDataset, numberAfter - numberBefore - 1)
+    deltaAlive = numberAfter - numberBefore - 1
+    numberKill = max(0.9*deltaAlive, min(deltaAlive * math.pow(abs(delta/(bestChromosomeAfter+1)),0.5), deltaAlive))
+    cumulateSaved += deltaAlive - numberKill
+    if(cumulateSaved*delta/(bestChromosomeBefore+1)>1):
+        numberKill += cumulateSaved
+        cumulateSaved = 0
+
+    chromosomeList = killNWeakest(chromosomeList, parsedDataset, numberKill)
     
 #    print(len(chromosomeList))
 #    chromosomeList = list(dict.fromkeys(chromosomeList))
