@@ -188,12 +188,13 @@ def killWeak(chromosomeList, fitnessList):
 def killNWeakest(chromosomeList, ds, n):
     fitnessList = []
     cleanedList = []
-    for c in range(chromosomeList):
+    for c in range(len(chromosomeList)):
         fitnessList.append(fitness(chromosomeList[c], ds))
     sortedInd = numpy.argsort(fitnessList)    
     
-    for c in range(len(chromosomeList)-n):
-        cleanedList[c] = chromosomeList[sortedInd[len(chromosomeList)-c]]
+    for c in range(len(sortedInd)):
+        if(sortedInd[c] > n):
+            cleanedList.append(chromosomeList[sortedInd[c]])
         
     return cleanedList
     
@@ -210,8 +211,11 @@ chromosomeList = generateChromosomes(parsedDataset, 10000)
 evolve = 1
 
 while(evolve):
+    numberBefore = len(chromosomeList)
     fitnessList = generateFitnessList(chromosomeList, parsedDataset)
     chromosomeList = mutateGroup(chromosomeList, fitnessList)
+    fitnessList = generateFitnessList(chromosomeList, parsedDataset)
+
 #    print(len(chromosomeList))
 
 #    killList = killWeak(chromosomeList, fitnessList)
@@ -221,7 +225,7 @@ while(evolve):
 #    
 ##    chromosomeList = set(chromosomeList) ^ set(killList)
     
-    bestChromosomes = extractBestN(chromosomeList, fitnessList, math.ceil(len(chromosomeList)/10))
+    bestChromosomes = extractBestN(chromosomeList, fitnessList, math.ceil(len(chromosomeList)/1))
 
     
     print(1/fitness(bestChromosomes[0], parsedDataset))
@@ -238,8 +242,10 @@ while(evolve):
     
 #    mixedBestChromosomes = mixList(bestChromosomes)
     chromosomeList = listCrossover(chromosomeList)  
-    chromosomeList = killNWeakest(chromosomeList, parsedDataset, 1000)
+    numberAfter = len(chromosomeList)
+    chromosomeList = killNWeakest(chromosomeList, parsedDataset, numberAfter - numberBefore - 1)
     
+#    print(len(chromosomeList))
 #    chromosomeList = list(dict.fromkeys(chromosomeList))
     
 #    chromosomeList = chromosomeList + newGeneration
