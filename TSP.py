@@ -11,7 +11,6 @@ from tkinter.filedialog import askopenfilename
 import csv
 import math
 from random import randrange
-import itertools
 import numpy
 
 def parseDataset(ds):
@@ -30,6 +29,59 @@ def generateChromosomes(ds, number):
         listChromosomes.append(randomChromosome)
     
     return listChromosomes
+
+def generateGreedyChromosomes(ds, number):
+    listChromosomes = []
+    
+    number = min(number, len(ds)-1)
+    for k in range(1, number):
+        city = ds[k]
+        listChromosomes.append(generateGreedyChromosome(city.get('num'), ds))
+        
+    return listChromosomes
+
+def generateGreedyChromosome(startingPoint, ds):
+    numberCities = len(ds)
+    baseChromosome = list(range(1, numberCities))
+    greedyChromosome = []
+    
+    greedyChromosome.append(int(startingPoint))
+    baseChromosome.remove(int(startingPoint))
+    
+    for g in range(numberCities-2):
+        closestPoint = findClosest(greedyChromosome[-1], baseChromosome, ds)[0]
+        greedyChromosome.append(closestPoint)
+      
+        baseChromosome.remove(int(closestPoint))
+        
+#    print(greedyChromosome)
+    return greedyChromosome
+
+def findClosest(element, baseChromosome, ds):
+    minDist = float("inf")
+    minElem = 0
+    currentLat = -1
+    currentLon = -1
+    
+    for el in ds:
+        if(int(el.get('num'))==int(element)):
+            currentLat = float(el.get('lat'))
+            currentLon = float(el.get('lon'))
+            
+    for elB in baseChromosome:
+        newLat = -1
+        newLon = -1
+        for elem in ds:
+           if(int(elem.get('num'))==elB):
+               newLat = float(elem.get('lat'))
+               newLon = float(elem.get('lon'))
+            
+        if(math.sqrt(math.pow(newLat-currentLat,2)+math.pow(newLon-currentLon,2))<minDist):
+            minElem = int(elB)
+            minDist = math.sqrt(math.pow(newLat-currentLat,2)+math.pow(newLon-currentLon,2))
+    
+    return [minElem, minDist]
+    
 
 def newChromosome(ds):
     chromosomeLength = len(ds)
@@ -207,6 +259,8 @@ dataset = open(filename, "r")
 parsedDataset = parseDataset(dataset)
 
 chromosomeList = generateChromosomes(parsedDataset, 1000)
+for d in range(1, 30):
+    chromosomeList += generateGreedyChromosomes(parsedDataset, 1000)
 
 evolve = 1
 
@@ -236,7 +290,7 @@ while(evolve):
     
     bestChromosomeBefore = bestChromosomeAfter
     bestChromosomeAfter = 1/fitness(bestChromosomes[0], parsedDataset)
-    amount = 100*math.exp(10*(-delta)/(bestChromosomeBefore+1))
+    amount = 1000*math.exp(100*(-delta)/(bestChromosomeBefore+1))
     
 
 #    print("AMOUNT: " + str(amount) + " ... DELTA " + str(-bestChromosomeBefore+bestChromosomeAfter))
@@ -260,7 +314,7 @@ while(evolve):
     chromosomeList = listCrossover(chromosomeList)  
     numberAfter = len(chromosomeList)
     deltaAlive = numberAfter - numberBefore - 1
-    numberKill = max(0.9*deltaAlive, min(deltaAlive * math.pow(abs(delta/(bestChromosomeAfter+1)),0.5), deltaAlive))
+    numberKill = max(0.95*deltaAlive, min(deltaAlive * math.pow(abs(delta/(bestChromosomeAfter+1)),0.5), deltaAlive))
     cumulateSaved += deltaAlive - numberKill
     if(cumulateSaved*delta/(bestChromosomeBefore+1)>1):
         numberKill += cumulateSaved
