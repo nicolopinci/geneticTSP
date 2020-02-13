@@ -128,9 +128,16 @@ def crossover(chromosome1, chromosome2):
         
     for c2 in range(len(chromosome1)-pivot):
         newChromosome.append(chromosome2[pivot+c2])
+        
+    if(isValid(newChromosome) and len(newChromosome) == len(chromosome1)):
+        return [newChromosome, newChromosome]
+    else:
+        return [chromosome1, chromosome2]
     
-    return newChromosome
-    
+def isValid(chromosome):
+    baseChromosome = list(range(1, len(chromosome)))
+    return all(elem in chromosome  for elem in baseChromosome)
+
 def generateFitnessList(chromosomeList, parsedDataset):
     fitnessList = []
     for f in range(len(chromosomeList)):
@@ -162,7 +169,7 @@ def mixList(myList):
     
     return myList
     
-def listCrossover(chromosomeList):
+def listCrossover(chromosomeList, fitnessList):
 #    newGeneration = []
 #    if(len(myList)>=2):
 #        for a in range(len(myList)-2):
@@ -175,9 +182,14 @@ def listCrossover(chromosomeList):
     for fitness in fitnessList:
         totDist += 1/fitness
         
+#    print(len(chromosomeList))
+#    print(len(fitnessList))
     for c in range(len(chromosomeList)-1):
-        if((1/fitnessList[c])/totDist <= 2*randrange(math.floor(1000))/1000):
-            crossList.append(crossover(chromosomeList[c], chromosomeList[c+1]))
+#        print("xxxxxxxxxxxxxxx")
+#        print((len(fitnessList)/fitnessList[c])/totDist)
+#        print("xxxxxxxxxxxx")
+        if((len(fitnessList)/fitnessList[c])/totDist <= 2*randrange(math.floor(1000))/1000):
+            crossList = crossList + crossover(chromosomeList[c], chromosomeList[c+1])
 #            crossList.append(crossover(chromosomeList[c+1], chromosomeList[c]))
         crossList.append(chromosomeList[c])
 #            crossList.append(chromosomeList[c+1])
@@ -193,7 +205,11 @@ def mutateGroup(chromosomeList, fitnessList, amount):
         totDist += 1/fitness
         
     for c in range(len(chromosomeList)):
-        if((amount/fitnessList[c]) >= randrange(math.floor(1000))/1000):
+#        print("======")
+#        print(amount/fitnessList[c])
+#        print(randrange(math.floor(1000))/1000)
+#        print("=====")
+        if((amount/fitnessList[c]) >= 5*randrange(math.floor(1000))):
             mutateList.append(mutation(chromosomeList[c]))
         
         mutateList.append(chromosomeList[c])
@@ -258,9 +274,11 @@ filename = askopenfilename() # show an "Open" dialog box and return the path to 
 dataset = open(filename, "r")
 parsedDataset = parseDataset(dataset)
 
-chromosomeList = generateChromosomes(parsedDataset, 1000)
-for d in range(1, 30):
-    chromosomeList += generateGreedyChromosomes(parsedDataset, 1000)
+chromosomeList = generateChromosomes(parsedDataset, 500)
+print(len(chromosomeList))
+for d in range(1, 15):
+    chromosomeList += generateGreedyChromosomes(parsedDataset, 30)
+print(len(chromosomeList))
 
 evolve = 1
 
@@ -268,14 +286,19 @@ bestChromosomeBefore = 0
 bestChromosomeAfter = 0
 amount = 0
 cumulateSaved = 0
+numDelta0 = 0
+eccedent = 0
 
+count = 0
 while(evolve):
+    count = count+1
     delta = -bestChromosomeBefore+bestChromosomeAfter
 
     numberBefore = len(chromosomeList)
     fitnessList = generateFitnessList(chromosomeList, parsedDataset)
     chromosomeList = mutateGroup(chromosomeList, fitnessList, amount)
     fitnessList = generateFitnessList(chromosomeList, parsedDataset)
+ 
 
 #    print(len(chromosomeList))
 
@@ -286,21 +309,33 @@ while(evolve):
 #    
 ##    chromosomeList = set(chromosomeList) ^ set(killList)
     
-    bestChromosomes = extractBestN(chromosomeList, fitnessList, math.ceil(len(chromosomeList)/1))
+    bestChromosomes = extractBestN(chromosomeList, fitnessList, len(chromosomeList))
+    
+#    print(len(bestChromosomes))
     
     bestChromosomeBefore = bestChromosomeAfter
     bestChromosomeAfter = 1/fitness(bestChromosomes[0], parsedDataset)
-    amount = 1000*math.exp(100*(-delta)/(bestChromosomeBefore+1))
+    amount = 0.01*math.exp((-delta)/(bestChromosomeBefore+1))/math.exp(1)
     
+    if(abs(delta) <= 1000):
+        numDelta0 = numDelta0 + 1
+        amount = amount*math.pow(numDelta0+1, 2)*math.exp(numpy.sign(delta+0.1))
+#        print("*")
+#        if(numDelta0 > 2):
+#            chromosomeList += generateChromosomes(parsedDataset, numDelta0*500)
+    else:
+        numDelta0 = 0
 
 #    print("AMOUNT: " + str(amount) + " ... DELTA " + str(-bestChromosomeBefore+bestChromosomeAfter))
 #    print(amount)
 #    amount = 100000/(bestChromosomeAfter - bestChromosomeBefore + 1)
     
-    print(1/fitness(bestChromosomes[0], parsedDataset))
+#    print(1/fitness(bestChromosomes[0], parsedDataset))
     
-#    print(bestChromosomes[0])
-    
+  
+    print(str(count) + " generations (cost: " + str(1/fitness(bestChromosomes[0], parsedDataset)) +")")
+#        print(bestChromosomes[0])
+
 #    threshold = calculateThreshold(fitnessList)
 #    killList = []
 #    killList = kill(chromosomeList, parsedDataset, threshold)
@@ -311,12 +346,14 @@ while(evolve):
 #    print(len(chromosomeList))
     
 #    mixedBestChromosomes = mixList(bestChromosomes)
-    chromosomeList = listCrossover(chromosomeList)  
+    
+    fitnessList = generateFitnessList(chromosomeList, parsedDataset)
+    chromosomeList = listCrossover(chromosomeList, fitnessList)  
     numberAfter = len(chromosomeList)
     deltaAlive = numberAfter - numberBefore - 1
-    numberKill = max(0.95*deltaAlive, min(deltaAlive * math.pow(abs(delta/(bestChromosomeAfter+1)),0.5), deltaAlive))
+    numberKill = max(0.95*deltaAlive, min(deltaAlive * math.pow(abs(delta/(bestChromosomeAfter+1)),2), deltaAlive))
     cumulateSaved += deltaAlive - numberKill
-    if(cumulateSaved*delta/(bestChromosomeBefore+1)>1):
+    if((cumulateSaved > 5000 and delta > 1000) or (cumulateSaved > 10000) or (delta/(bestChromosomeAfter+1) > 0.05)):
         numberKill += cumulateSaved
         cumulateSaved = 0
 
