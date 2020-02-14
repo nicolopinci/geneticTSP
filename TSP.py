@@ -12,6 +12,7 @@ import csv
 import math
 from random import randrange
 import numpy
+import random
 
 def parseDataset(ds):
     csvReader = csv.reader(ds, delimiter=' ')
@@ -33,15 +34,15 @@ def generateChromosomes(ds, number):
 def generateGreedyChromosomes(ds, number):
     listChromosomes = []
     
-    number = min(number, len(ds)-1)
+    number = min(number, len(ds))
     for k in range(1, number):
-        city = ds[k]
+        city = ds[k-1]
         listChromosomes.append(generateGreedyChromosome(city.get('num'), ds))
-        
+    
     return listChromosomes
 
 def generateGreedyChromosome(startingPoint, ds):
-    numberCities = len(ds)
+    numberCities = len(ds)+1
     baseChromosome = list(range(1, numberCities))
     greedyChromosome = []
     
@@ -84,7 +85,7 @@ def findClosest(element, baseChromosome, ds):
     
 
 def newChromosome(ds):
-    chromosomeLength = len(ds)
+    chromosomeLength = len(ds)+1
     baseChromosome = list(range(1, chromosomeLength))
     for l in range(chromosomeLength):
         index1 = randrange(chromosomeLength-1)
@@ -95,17 +96,7 @@ def newChromosome(ds):
     return baseChromosome
 
 def fitness(chromosome, ds):
-    dist = 0;
-    for c in range(len(chromosome)):
-        currentIndex = int(chromosome[c])
-        latC = float(ds[currentIndex].get('lat'))
-        lonC = float(ds[currentIndex].get('lon'))
-        if(c == 0):
-            dist += math.sqrt(math.pow(latC, 2)+math.pow(lonC, 2))
-        else:
-            previousIndex = int(chromosome[c-1])
-            dist += math.sqrt(math.pow(latC-float(ds[previousIndex].get('lat')), 2)+math.pow(lonC-float(ds[previousIndex].get('lon')), 2))
-    return 1/dist
+    return 1/distance(chromosome, ds)
     
 def mutation(chromosome):
     chromosomeLength = len(chromosome)
@@ -114,10 +105,33 @@ def mutation(chromosome):
     temp = chromosome[index2]
     chromosome[index2] = chromosome[index1]
     chromosome[index1] = temp
-#    print(len(chromosome))
     return chromosome
 
-def crossover(chromosome1, chromosome2):
+
+def crossover(parent1, parent2): # source: https://towardsdatascience.com/evolution-of-a-salesman-a-complete-genetic-algorithm-tutorial-for-python-6fe5d2b3ca35
+    
+
+    child = []
+    childP1 = []
+    childP2 = []
+    
+    geneA = int(random.random() * len(parent1))
+    geneB = int(random.random() * len(parent1))
+    
+    startGene = min(geneA, geneB)
+    endGene = max(geneA, geneB)
+
+    for i in range(startGene, endGene):
+        childP1.append(parent1[i])
+        
+    childP2 = [item for item in parent2 if item not in childP1]
+
+    child = childP1 + childP2
+        
+    return [child, child]
+
+
+def oldCrossover(chromosome1, chromosome2):
     
     pivot = randrange(len(chromosome1)-2)
     newChromosome = []
@@ -126,9 +140,11 @@ def crossover(chromosome1, chromosome2):
     for c1 in range(pivot):
         newChromosome.append(chromosome1[c1])
         
-    for c2 in range(len(chromosome1)-pivot):
+    for c2 in range(len(chromosome1)-pivot-1):
         newChromosome.append(chromosome2[pivot+c2])
-        
+    
+
+            
     if(isValid(newChromosome) and len(newChromosome) == len(chromosome1)):
         return [newChromosome, newChromosome]
     else:
@@ -169,7 +185,7 @@ def mixList(myList):
     
     return myList
     
-def listCrossover(chromosomeList, fitnessList):
+def listCrossover(chromosomeList, fitnessList, amountCrossover):
 #    newGeneration = []
 #    if(len(myList)>=2):
 #        for a in range(len(myList)-2):
@@ -188,11 +204,19 @@ def listCrossover(chromosomeList, fitnessList):
 #        print("xxxxxxxxxxxxxxx")
 #        print((len(fitnessList)/fitnessList[c])/totDist)
 #        print("xxxxxxxxxxxx")
-        if((len(fitnessList)/fitnessList[c])/totDist <= 2*randrange(math.floor(1000))/1000):
-            for s in range(1, len(chromosomeList)):
+        hitProb = 1-(1/fitnessList[c])/totDist
+        randomNumber = randrange(1000)/1000
+        
+        if(hitProb > randomNumber):
+            sMax = len(chromosomeList)
+            s = 0
+            found = 0
+            while(found == 0 and s < sMax):
+                s = s+1
                 newChromosomes = crossover(shiftChromosome(chromosomeList[c], s), chromosomeList[c+1])
                 if(newChromosomes[1] != chromosomeList[c+1]):
                     crossList = crossList + newChromosomes
+                    found = 1
 #            crossList.append(crossover(chromosomeList[c+1], chromosomeList[c]))
         crossList.append(chromosomeList[c])
 #            crossList.append(chromosomeList[c+1])
@@ -213,9 +237,13 @@ def mutateGroup(chromosomeList, fitnessList, amount):
     for c in range(len(chromosomeList)):
 #        print("======")
 #        print(amount/fitnessList[c])
-#        print(randrange(math.floor(1000))/1000)
+#        print(randrange(1, 500)/1000*totDist/len(fitnessList))
 #        print("=====")
-        if((amount/fitnessList[c]) >= 5*randrange(math.floor(1000))):
+        hitProb = amount*(1/fitnessList[c])/totDist
+        randomNumber = randrange(1000)/1000
+        
+        if(hitProb > randomNumber):
+#            print("!!!")
             mutateList.append(mutation(chromosomeList[c]))
         
         mutateList.append(chromosomeList[c])
@@ -272,7 +300,32 @@ def killNWeakest(chromosomeList, ds, n):
         
     return cleanedList
     
+def epidemy(chromosomeList, parsedDataset):
+    if(len(chromosomeList)>500):
+        chromosomeList = killNWeakest(chromosomeList, parsedDataset, len(chromosomeList) - 250)
+    return chromosomeList
+
+def distance(chromosome, ds):
+    dist = 0;
+    currentIndex = -1
+    previousIndex = -1
     
+    for c in range(len(chromosome)):
+        if(c!=0):
+            currentIndex = int(chromosome[c])
+            previousIndex = int(chromosome[c-1])
+        if(c == 0):
+            currentIndex = int(chromosome[0])
+            previousIndex = chromosome[len(chromosome) - 1]
+        
+        latC = float(ds[currentIndex-1].get('lat'))
+        lonC = float(ds[currentIndex-1].get('lon'))
+        
+        dist += math.sqrt(math.pow(latC-float(ds[previousIndex-1].get('lat')), 2)+math.pow(lonC-float(ds[previousIndex-1].get('lon')), 2))
+        
+    return dist
+    
+amountCrossover = 0
 # Upload a file
 Tk().withdraw() # we don't want a full GUI, so keep the root window from appearing
 filename = askopenfilename() # show an "Open" dialog box and return the path to the selected file
@@ -287,112 +340,57 @@ evolve = 1
 
 bestChromosomeBefore = 0
 bestChromosomeAfter = 0
-amount = 0
+probabilityMutation = 0.1
+numElite = len(chromosomeList)*0.2
 cumulateSaved = 0
 numDelta0 = 0
 eccedent = 0
+first = 1
 
 count = 0
 while(evolve):
     count = count+1
-    delta = -bestChromosomeBefore+bestChromosomeAfter
-
-    numberBefore = len(chromosomeList)
+        
     fitnessList = generateFitnessList(chromosomeList, parsedDataset)
-    chromosomeList = mutateGroup(chromosomeList, fitnessList, amount)
+    chromosomeList = mutateGroup(chromosomeList, fitnessList, probabilityMutation)
     fitnessList = generateFitnessList(chromosomeList, parsedDataset)
- 
-
-#    print(len(chromosomeList))
-
-#    killList = killWeak(chromosomeList, fitnessList)
-##    print(killList)
-#    set1 = {tuple(item) for item in chromosomeList}
-#    chromosomeList = [list(item) for item in set1 if tuple(item) not in killList]
-#    
-##    chromosomeList = set(chromosomeList) ^ set(killList)
     
     bestChromosomes = extractBestN(chromosomeList, fitnessList, len(chromosomeList))
-    
-#    print(len(bestChromosomes))
-    
+        
     bestChromosomeBefore = bestChromosomeAfter
     bestChromosomeAfter = 1/fitness(bestChromosomes[0], parsedDataset)
-    amount = 0.01*math.exp((-delta)/(bestChromosomeBefore+1))/math.exp(1)
-    
-    if(abs(delta) <= 1000):
+    delta = bestChromosomeBefore - bestChromosomeAfter
+
+    if(delta <= 100):
         numDelta0 = numDelta0 + 1
-        amount = amount*max(math.pow(numDelta0+1, 0.5)-math.exp(numpy.sign(delta+0.1)), 1.5)
-#        print("*")
-#        if(numDelta0 > 2):
-#            chromosomeList += generateChromosomes(parsedDataset, numDelta0*500)
     else:
         numDelta0 = 0
 
-#    print("AMOUNT: " + str(amount) + " ... DELTA " + str(-bestChromosomeBefore+bestChromosomeAfter))
-#    print(amount)
-#    amount = 100000/(bestChromosomeAfter - bestChromosomeBefore + 1)
-    
-#    print(1/fitness(bestChromosomes[0], parsedDataset))
-    
-  
-    print(str(count) + " generations (cost: " + str(1/fitness(bestChromosomes[0], parsedDataset)) +")")
-#        print(bestChromosomes[0])
+    if(delta > 50):
+        numElite = min(math.floor(len(chromosomeList)*0.5), numElite+math.floor(delta/100))
+        chromosomeList = killNWeakest(chromosomeList, parsedDataset, len(chromosomeList) - max(math.ceil(20000/delta), 100))
 
-#    threshold = calculateThreshold(fitnessList)
-#    killList = []
-#    killList = kill(chromosomeList, parsedDataset, threshold)
-#    
-#    set1 = {tuple(item) for item in chromosomeList}
-#    chromosomeList = [item for item in set1 if tuple(item) not in killList]
-#    
-#    print(len(chromosomeList))
-    
-#    mixedBestChromosomes = mixList(bestChromosomes)
+        if(numDelta0 > 3):
+            probabilityMutation = probabilityMutation*(numDelta0+1)
+        
+    elif(delta < -500 and first == 0):
+        print("*****")
+        numElite = max(2, numElite-1)
+        probabilityMutation = probabilityMutation/1.3
+        if(delta < -1500):
+            chromosomeList += generateChromosomes(parsedDataset, math.floor(-delta/100))
+        chromosomeList = epidemy(chromosomeList, parsedDataset)
+            
+    else:
+        probabilityMutation = min(pow(probabilityMutation, 0.5), 1)
+        
+        if(numDelta0 > 3):
+            probabilityMutation = probabilityMutation*(numDelta0+1)
+
+    print(str(count) + " generations (distance: " + str(distance(bestChromosomes[0], parsedDataset)) +" and best path: " + str(bestChromosomes[0]) + ")")
     
     fitnessList = generateFitnessList(chromosomeList, parsedDataset)
-    chromosomeList = listCrossover(chromosomeList, fitnessList)  
-    numberAfter = len(chromosomeList)
-    deltaAlive = numberAfter - numberBefore - 1
-    numberKill = max(0.95*deltaAlive, min(deltaAlive * math.pow(abs(delta/(bestChromosomeAfter+1)),2), deltaAlive))
-    cumulateSaved += deltaAlive - numberKill
-    if((cumulateSaved > 100 and delta > 1000) or (cumulateSaved > 200) or (delta/(bestChromosomeAfter+1) > 0.05)):
-        numberKill += cumulateSaved
-        cumulateSaved = 0
-
-    chromosomeList = killNWeakest(chromosomeList, parsedDataset, numberKill)
+    chromosomeList = listCrossover(chromosomeList, fitnessList, numElite)  
+    chromosomeList = epidemy(chromosomeList, parsedDataset)
     
-#    print(len(chromosomeList))
-#    chromosomeList = list(dict.fromkeys(chromosomeList))
-    
-#    chromosomeList = chromosomeList + newGeneration
-    
-#    chromosomeList = mixList(chromosomeList)
-        
-#    numberMutations = math.ceil(randrange(len(chromosomeList))/2)
-    
-#    print(len(bestChromosomes))
-#    print(len(chromosomeList))
-#    print(len(newGeneration))
-#    print(numberMutations)
-#    print("\n")
-#    print(numberMutations)
-#    print(len(chromosomeList))
-    
-    
-
-    
-    #print(chromosomeList)
-    
-    
-#    print(bestChromosome[1])
-#    print(1/fitness(bestChromosome[1], parsedDataset))
-#    
-#    
-
-
-#print(chromosomeList[0])
-#print("\n")
-#print(chromosomeList[1])
-#print("\n\n")
-#print(crossover(chromosomeList[0], chromosomeList[1]))
+    first = 0
