@@ -13,6 +13,7 @@ import math
 from random import randrange
 import numpy
 import random
+import pygame
 
 def parseDataset(ds):
     csvReader = csv.reader(ds, delimiter=' ')
@@ -96,7 +97,7 @@ def newChromosome(ds):
     return baseChromosome
 
 def fitness(chromosome, ds):
-    return 1/distance(chromosome, ds)
+    return 1/distance(chromosome, ds, False)
     
 def mutation(chromosome):
     chromosomeLength = len(chromosome)
@@ -244,7 +245,8 @@ def mutateGroup(chromosomeList, fitnessList, amount):
         
         if(hitProb > randomNumber):
 #            print("!!!")
-            mutateList.append(mutation(chromosomeList[c]))
+            if(chromosomeList[c]!=extractBestN(chromosomeList, fitnessList, 1)[0]):
+                mutateList.append(mutation(chromosomeList[c]))
         
         mutateList.append(chromosomeList[c])
 
@@ -305,10 +307,16 @@ def epidemy(chromosomeList, parsedDataset):
         chromosomeList = killNWeakest(chromosomeList, parsedDataset, len(chromosomeList) - 250)
     return chromosomeList
 
-def distance(chromosome, ds):
+def distance(chromosome, ds, drawLine):
     dist = 0;
     currentIndex = -1
     previousIndex = -1
+    
+    if(drawLine == True):
+        screen.fill((0,0,0))
+        pygame.display.update()
+        
+    factor = float(ds[0].get('lat'))*1.3/500
     
     for c in range(len(chromosome)):
         if(c!=0):
@@ -321,8 +329,17 @@ def distance(chromosome, ds):
         latC = float(ds[currentIndex-1].get('lat'))
         lonC = float(ds[currentIndex-1].get('lon'))
         
-        dist += math.sqrt(math.pow(latC-float(ds[previousIndex-1].get('lat')), 2)+math.pow(lonC-float(ds[previousIndex-1].get('lon')), 2))
+        prevLat = float(ds[previousIndex-1].get('lat'))
+        prevLon = float(ds[previousIndex-1].get('lon'))
         
+        dist += math.sqrt(math.pow((latC-prevLat), 2)+math.pow((lonC-prevLon), 2))
+        
+        if(drawLine == True):
+            pygame.draw.line(screen, (255,0,0), (prevLon/factor, prevLat/factor-250), (lonC/factor, latC/factor-250), 1)
+    
+    pygame.display.flip()
+#        pygame.display.update()
+
     return dist
     
 amountCrossover = 0
@@ -348,7 +365,13 @@ eccedent = 0
 first = 1
 
 count = 0
+pygame.init()
+screen = pygame.display.set_mode([500, 500])
+
+
 while(evolve):
+    screen.fill((0, 0, 0))
+
     count = count+1
         
     fitnessList = generateFitnessList(chromosomeList, parsedDataset)
@@ -387,10 +410,12 @@ while(evolve):
         if(numDelta0 > 3):
             probabilityMutation = probabilityMutation*(numDelta0+1)
 
-    print(str(count) + " generations (distance: " + str(distance(bestChromosomes[0], parsedDataset)) +" and best path: " + str(bestChromosomes[0]) + ")")
+    print(str(count) + " generations (distance: " + str(distance(bestChromosomes[0], parsedDataset, True)) +" and best path: " + str(bestChromosomes[0]) + ")")
     
     fitnessList = generateFitnessList(chromosomeList, parsedDataset)
     chromosomeList = listCrossover(chromosomeList, fitnessList, numElite)  
     chromosomeList = epidemy(chromosomeList, parsedDataset)
     
     first = 0
+    
+pygame.quit()
