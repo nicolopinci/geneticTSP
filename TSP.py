@@ -189,12 +189,18 @@ def listCrossover(chromosomeList, fitnessList):
 #        print((len(fitnessList)/fitnessList[c])/totDist)
 #        print("xxxxxxxxxxxx")
         if((len(fitnessList)/fitnessList[c])/totDist <= 2*randrange(math.floor(1000))/1000):
-            crossList = crossList + crossover(chromosomeList[c], chromosomeList[c+1])
+            for s in range(1, len(chromosomeList)):
+                newChromosomes = crossover(shiftChromosome(chromosomeList[c], s), chromosomeList[c+1])
+                if(newChromosomes[1] != chromosomeList[c+1]):
+                    crossList = crossList + newChromosomes
 #            crossList.append(crossover(chromosomeList[c+1], chromosomeList[c]))
         crossList.append(chromosomeList[c])
 #            crossList.append(chromosomeList[c+1])
     crossList.append(chromosomeList[len(chromosomeList)-1])
     return crossList
+
+def shiftChromosome(chromosome, s):
+    return numpy.roll(chromosome, s)
 
 def mutateGroup(chromosomeList, fitnessList, amount):
     
@@ -274,11 +280,8 @@ filename = askopenfilename() # show an "Open" dialog box and return the path to 
 dataset = open(filename, "r")
 parsedDataset = parseDataset(dataset)
 
-chromosomeList = generateChromosomes(parsedDataset, 500)
-print(len(chromosomeList))
-for d in range(1, 15):
-    chromosomeList += generateGreedyChromosomes(parsedDataset, 30)
-print(len(chromosomeList))
+chromosomeList = generateChromosomes(parsedDataset, 30)
+chromosomeList += generateGreedyChromosomes(parsedDataset, 30)
 
 evolve = 1
 
@@ -319,7 +322,7 @@ while(evolve):
     
     if(abs(delta) <= 1000):
         numDelta0 = numDelta0 + 1
-        amount = amount*math.pow(numDelta0+1, 2)*math.exp(numpy.sign(delta+0.1))
+        amount = amount*max(math.pow(numDelta0+1, 0.5)-math.exp(numpy.sign(delta+0.1)), 1.5)
 #        print("*")
 #        if(numDelta0 > 2):
 #            chromosomeList += generateChromosomes(parsedDataset, numDelta0*500)
@@ -353,7 +356,7 @@ while(evolve):
     deltaAlive = numberAfter - numberBefore - 1
     numberKill = max(0.95*deltaAlive, min(deltaAlive * math.pow(abs(delta/(bestChromosomeAfter+1)),2), deltaAlive))
     cumulateSaved += deltaAlive - numberKill
-    if((cumulateSaved > 5000 and delta > 1000) or (cumulateSaved > 10000) or (delta/(bestChromosomeAfter+1) > 0.05)):
+    if((cumulateSaved > 100 and delta > 1000) or (cumulateSaved > 200) or (delta/(bestChromosomeAfter+1) > 0.05)):
         numberKill += cumulateSaved
         cumulateSaved = 0
 
