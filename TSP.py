@@ -108,7 +108,12 @@ def mutation(chromosome):
     chromosome[index1] = temp
     return chromosome
 
-
+def multipleMutation(chromosome, percentage):
+    multipleMutatedChromosome = chromosome
+    for m in range(0, max(math.floor(percentage*len(chromosome)-1), 1)):
+        multipleMutatedChromosome = mutation(multipleMutatedChromosome)
+    return multipleMutatedChromosome
+        
 def crossover(parent1, parent2): # source: https://towardsdatascience.com/evolution-of-a-salesman-a-complete-genetic-algorithm-tutorial-for-python-6fe5d2b3ca35
     
 
@@ -227,7 +232,7 @@ def listCrossover(chromosomeList, fitnessList, amountCrossover):
 def shiftChromosome(chromosome, s):
     return numpy.roll(chromosome, s)
 
-def mutateGroup(chromosomeList, fitnessList, amount):
+def mutateGroup(chromosomeList, fitnessList, amount, multiple):
     
     totDist = 0;
     mutateList = []
@@ -246,7 +251,10 @@ def mutateGroup(chromosomeList, fitnessList, amount):
         if(hitProb > randomNumber):
 #            print("!!!")
             if(chromosomeList[c]!=extractBestN(chromosomeList, fitnessList, 1)[0]):
-                mutateList.append(mutation(chromosomeList[c]))
+                if(multiple == False):
+                    mutateList.append(mutation(chromosomeList[c]))
+                else:
+                    mutateList.append(multipleMutation(chromosomeList[c], amount))
         
         mutateList.append(chromosomeList[c])
 
@@ -312,12 +320,23 @@ def distance(chromosome, ds, drawLine):
     currentIndex = -1
     previousIndex = -1
     
+    minLat = float("inf")
+    maxLat = -float("inf")
+    minLon = float("inf")
+    maxLon = -float("inf")
+    
+    centerLat = 0
+    centerLon = 0
+    
+    prevLat = []
+    prevLon = []
+    latC = []
+    lonC = []
+    
     if(drawLine == True):
         screen.fill((0,0,0))
         pygame.display.update()
-        
-    factor = float(ds[0].get('lat'))*1.3/500
-    
+            
     for c in range(len(chromosome)):
         if(c!=0):
             currentIndex = int(chromosome[c])
@@ -326,18 +345,52 @@ def distance(chromosome, ds, drawLine):
             currentIndex = int(chromosome[0])
             previousIndex = chromosome[len(chromosome) - 1]
         
-        latC = float(ds[currentIndex-1].get('lat'))
-        lonC = float(ds[currentIndex-1].get('lon'))
+        latC.append(float(ds[currentIndex-1].get('lat')))
+        lonC.append(float(ds[currentIndex-1].get('lon')))
         
-        prevLat = float(ds[previousIndex-1].get('lat'))
-        prevLon = float(ds[previousIndex-1].get('lon'))
+        prevLat.append(float(ds[previousIndex-1].get('lat')))
+        prevLon.append(float(ds[previousIndex-1].get('lon')))
         
-        dist += math.sqrt(math.pow((latC-prevLat), 2)+math.pow((lonC-prevLon), 2))
-        
-        if(drawLine == True):
-            pygame.draw.line(screen, (255,0,0), (prevLon/factor, prevLat/factor-250), (lonC/factor, latC/factor-250), 1)
+        dist += math.sqrt(math.pow((latC[-1]-prevLat[-1]), 2)+math.pow((lonC[-1]-prevLon[-1]), 2))
     
+    if(drawLine == True):
+        for x in range(0, len(latC)-1):
+            if(max(latC[x], prevLat[x]) > maxLat):
+                maxLat = max(latC[x], prevLat[x])
+                
+            if(min(latC[x], prevLat[x]) < minLat):
+                minLat = min(latC[x], prevLat[x])
+                
+            if(max(lonC[x], prevLon[x]) > maxLon):
+                maxLon = max(lonC[x], prevLon[x])
+                
+            if(min(lonC[x], prevLon[x]) < minLon):
+                minLon = min(lonC[x], prevLon[x])
+                
+        centerLat = (minLat+maxLat)/2
+        centerLon = (minLon+maxLon)/2
+        
+        scaleLat = 450/(maxLat - minLat)
+        scaleLon = 450/(maxLon - minLon)
+        
+        trasLat = 250
+        trasLon = 250
+        
+        for k in range(0, len(latC)):
+            latC[k] = -latC[k] + centerLat
+            prevLat[k] = -prevLat[k] + centerLat
+            lonC[k] = -lonC[k] + centerLon
+            prevLon[k] = -prevLon[k] + centerLon
+            
+            latC[k] = latC[k]*scaleLat + trasLat
+            prevLat[k] = prevLat[k]*scaleLat + trasLat
+            lonC[k] = lonC[k]*scaleLon + trasLon
+            prevLon[k] = prevLon[k]*scaleLon + trasLon
+        
+            pygame.draw.line(screen, (255,0,0), (prevLon[k], prevLat[k]), (lonC[k], latC[k]), 1)
+
     pygame.display.flip()
+
 #        pygame.display.update()
 
     return dist
@@ -350,14 +403,16 @@ filename = askopenfilename() # show an "Open" dialog box and return the path to 
 dataset = open(filename, "r")
 parsedDataset = parseDataset(dataset)
 
-chromosomeList = generateChromosomes(parsedDataset, 30)
-chromosomeList += generateGreedyChromosomes(parsedDataset, 30)
+chromosomeList = generateChromosomes(parsedDataset, 60)
+#chromosomeList += generateGreedyChromosomes(parsedDataset, 30)
 
 evolve = 1
 
 bestChromosomeBefore = 0
 bestChromosomeAfter = 0
 probabilityMutation = 0.1
+probabilityMultipleMutation = 0.01
+
 numElite = len(chromosomeList)*0.2
 cumulateSaved = 0
 numDelta0 = 0
@@ -375,7 +430,7 @@ while(evolve):
     count = count+1
         
     fitnessList = generateFitnessList(chromosomeList, parsedDataset)
-    chromosomeList = mutateGroup(chromosomeList, fitnessList, probabilityMutation)
+    chromosomeList = mutateGroup(chromosomeList, fitnessList, probabilityMutation, False)
     fitnessList = generateFitnessList(chromosomeList, parsedDataset)
     
     bestChromosomes = extractBestN(chromosomeList, fitnessList, len(chromosomeList))
@@ -395,6 +450,8 @@ while(evolve):
 
         if(numDelta0 > 3):
             probabilityMutation = probabilityMutation*(numDelta0+1)
+            
+            
         
     elif(delta < -500 and first == 0):
         print("*****")
@@ -405,10 +462,17 @@ while(evolve):
         chromosomeList = epidemy(chromosomeList, parsedDataset)
             
     else:
-        probabilityMutation = min(pow(probabilityMutation, 0.5), 1)
-        
-        if(numDelta0 > 3):
+        probabilityMutation = min(pow(probabilityMutation, 0.5), 1.2)
+#        probabilityMultipleMutation = min(pow(probabilityMultipleMutation, 0.5), 1.2)
+
+        if(numDelta0 > 2):
             probabilityMutation = probabilityMutation*(numDelta0+1)
+            
+            if(numDelta0 > 5):
+                probabilityMultipleMutation = probabilityMultipleMutation+0.01*max(3*numDelta0, 50)
+                fitnessList = generateFitnessList(chromosomeList, parsedDataset)
+                chromosomeList = mutateGroup(chromosomeList, fitnessList, probabilityMultipleMutation, True)
+
 
     print(str(count) + " generations (distance: " + str(distance(bestChromosomes[0], parsedDataset, True)) +" and best path: " + str(bestChromosomes[0]) + ")")
     
