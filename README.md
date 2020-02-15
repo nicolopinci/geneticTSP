@@ -10,9 +10,13 @@ Source: <http://www.math.uwaterloo.ca/tsp/world/djtour.html>
 * Optimal result: 6656
 * Error: 0.108 %
 
-![Djibouti path using GA](https://github.com/nicolopinci/geneticTSP/tree/master/img/djibouti.png)
+![Djibouti path using GA][https://github.com/nicolopinci/geneticTSP/tree/master/img/djibouti.png]
 
-```1 generations (distance: 6770.076921715761 and best path: [19, 18, 17, 16, 12, 11, 9, 8, 7, 6, 5, 3, 4, 2, 1, 10, 14, 21, 29, 30, 32, 35, 37, 38, 33, 34, 36, 31, 27, 28, 24, 22, 20, 23, 25, 26, 15, 13])
+<details>
+  <summary>Show the results</summary>
+
+```
+1 generations (distance: 6770.076921715761 and best path: [19, 18, 17, 16, 12, 11, 9, 8, 7, 6, 5, 3, 4, 2, 1, 10, 14, 21, 29, 30, 32, 35, 37, 38, 33, 34, 36, 31, 27, 28, 24, 22, 20, 23, 25, 26, 15, 13])
 2 generations (distance: 6770.076921715761 and best path: [19, 18, 17, 16, 12, 11, 9, 8, 7, 6, 5, 3, 4, 2, 1, 10, 14, 21, 29, 30, 32, 35, 37, 38, 33, 34, 36, 31, 27, 28, 24, 22, 20, 23, 25, 26, 15, 13])
 3 generations (distance: 6770.076921715761 and best path: [19, 18, 17, 16, 12, 11, 9, 8, 7, 6, 5, 3, 4, 2, 1, 10, 14, 21, 29, 30, 32, 35, 37, 38, 33, 34, 36, 31, 27, 28, 24, 22, 20, 23, 25, 26, 15, 13])
 4 generations (distance: 6770.076921715761 and best path: [19, 18, 17, 16, 12, 11, 9, 8, 7, 6, 5, 3, 4, 2, 1, 10, 14, 21, 29, 30, 32, 35, 37, 38, 33, 34, 36, 31, 27, 28, 24, 22, 20, 23, 25, 26, 15, 13])
@@ -59,3 +63,5 @@ Source: <http://www.math.uwaterloo.ca/tsp/world/djtour.html>
 45 generations (distance: 6714.730474523721 and best path: [18, 19, 17, 12, 11, 9, 8, 7, 6, 5, 3, 4, 2, 1, 10, 14, 21, 29, 30, 32, 35, 37, 38, 33, 34, 36, 31, 27, 28, 24, 22, 23, 26, 25, 20, 15, 13, 16])
 46 generations (distance: 6714.730474523721 and best path: [18, 19, 17, 12, 11, 9, 8, 7, 6, 5, 3, 4, 2, 1, 10, 14, 21, 29, 30, 32, 35, 37, 38, 33, 34, 36, 31, 27, 28, 24, 22, 23, 26, 25, 20, 15, 13, 16])
 47 generations (distance: 6663.213801224396 and best path: [19, 17, 12, 11, 9, 8, 7, 6, 5, 3, 4, 2, 1, 10, 14, 21, 29, 30, 32, 35, 37, 38, 33, 34, 36, 31, 27, 28, 24, 22, 25, 26, 23, 20, 15, 13, 16, 18])```
+
+</details>
