@@ -402,7 +402,7 @@ def distance(chromosome, ds, drawLine):
 
 #        pygame.display.update()
 
-    return dist
+    return round(dist)
     
 amountCrossover = 0
 # Upload a file

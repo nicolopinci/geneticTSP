@@ -10,7 +10,7 @@ Source: <http://www.math.uwaterloo.ca/tsp/world/djtour.html>
 * Optimal result: 6656
 * Error: 0.05 %
 
-Note: the difference in the result can be caused by numerical errors (In the TSPLIB norm, the travel cost between each pair of cities is the Euclidean distance between the points rounded to the nearest integer (not the distance rounded to two decimal places). Source: <https://cs.stackexchange.com/questions/56597/tsp-problem-with-a-benchmark-data>).
+Note: the difference in the first result can be caused by numerical errors (In the TSPLIB norm, the travel cost between each pair of cities is the Euclidean distance between the points rounded to the nearest integer (not the distance rounded to two decimal places). Source: <https://cs.stackexchange.com/questions/56597/tsp-problem-with-a-benchmark-data>). Since the fitness is calculated as 1/distance, this can create some differences.
 
 ![Djibouti path using GA](https://raw.githubusercontent.com/nicolopinci/geneticTSP/master/img/djibouti.png "Djibouti path using GA")
 
@@ -58,7 +58,7 @@ Source: <http://www.math.uwaterloo.ca/tsp/world/witour.html>
 * Optimal result: 27603
 * Error: 0 %
 
-Note: the difference in the result can be caused by numerical errors (In the TSPLIB norm, the travel cost between each pair of cities is the Euclidean distance between the points rounded to the nearest integer (not the distance rounded to two decimal places). Source: <https://cs.stackexchange.com/questions/56597/tsp-problem-with-a-benchmark-data>.
+Note: the difference in the result can be caused by numerical errors (In the TSPLIB norm, the travel cost between each pair of cities is the Euclidean distance between the points rounded to the nearest integer (not the distance rounded to two decimal places). Source: <https://cs.stackexchange.com/questions/56597/tsp-problem-with-a-benchmark-data>. Since the fitness is calculated as 1/distance, this can create some differences.
 
 ![Sahara path using GA](https://raw.githubusercontent.com/nicolopinci/geneticTSP/master/img/sahara.png "Sahara path using GA")
 
