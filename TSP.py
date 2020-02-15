@@ -340,7 +340,16 @@ def killNWeakest(chromosomeList, ds, n):
         
     return cleanedList
     
+  
 def epidemy(chromosomeList, parsedDataset):
+    
+#    for l in range(0, len(chromosomeList)-1):
+#        s = 0
+#        for gene in chromosomeList[l]:
+#            if(gene == 1):
+#                chromosomeList[l] = numpy.roll(chromosomeList[s], s)
+#            s = s+1
+        
     if(len(chromosomeList)>500):
         chromosomeList = killNWeakest(chromosomeList, parsedDataset, len(chromosomeList) - 250)
     return chromosomeList
@@ -433,9 +442,9 @@ filename = askopenfilename() # show an "Open" dialog box and return the path to 
 dataset = open(filename, "r")
 parsedDataset = parseDataset(dataset)
 
-chromosomeList = generateChromosomes(parsedDataset, 90)
+chromosomeList = generateChromosomes(parsedDataset, 120)
 chromosomeList += generateGreedyChromosomes(parsedDataset, 30)
-chromosomeList += generateAlmostGreedyChromosomes(parsedDataset, 60)
+chromosomeList += generateAlmostGreedyChromosomes(parsedDataset, 30)
 
 
 evolve = 1
@@ -496,16 +505,21 @@ while(evolve):
     else:
         probabilityMutation = min(pow(probabilityMutation, 0.5), 1.2)
 #        probabilityMultipleMutation = min(pow(probabilityMultipleMutation, 0.5), 1.2)
+        
 
         if(numDelta0 > 2):
             probabilityMutation = probabilityMutation*(numDelta0+1)
-            
+            chromosomeList += generateChromosomes(parsedDataset, numDelta0)
+            chromosomeList += generateAlmostGreedyChromosomes(parsedDataset, numDelta0)
+
             if(numDelta0 > 5):
                 probabilityMultipleMutation = probabilityMultipleMutation+0.01*max(3*numDelta0, 50)
                 if(numDelta0 > 15):
-                    probabilityMultipleMutation = probabilityMultipleMutation+0.01*max(4*numDelta0, 70)
+                    probabilityMultipleMutation = probabilityMultipleMutation+0.01*max(2*numDelta0, 70)
                     if(numDelta0 > 20):
-                        probabilityMultipleMutation = probabilityMultipleMutation+0.01*max(4*numDelta0, 90)
+                        probabilityMultipleMutation = probabilityMultipleMutation+0.01*max(2*numDelta0, 80)
+                        if(numDelta0 > 30):
+                            probabilityMultipleMutation = probabilityMultipleMutation+0.01*max(2*numDelta0, 90)
 
                 fitnessList = generateFitnessList(chromosomeList, parsedDataset)
                 chromosomeList = mutateGroup(chromosomeList, fitnessList, probabilityMultipleMutation, True)
