@@ -479,7 +479,7 @@ while(evolve):
 
     if(delta > 50):
         numElite = min(math.floor(len(chromosomeList)*0.5), numElite+math.floor(delta/100))
-        chromosomeList = killNWeakest(chromosomeList, fitnessList, parsedDataset, len(chromosomeList) - max(math.ceil(20000/delta), 100))
+#        chromosomeList = killNWeakest(chromosomeList, fitnessList, parsedDataset, len(chromosomeList) - max(math.ceil(20000/delta), 100))
 
         if(numDelta0 > 3):
             probabilityMutation = probabilityMutation*(numDelta0+1)
@@ -492,7 +492,7 @@ while(evolve):
         probabilityMutation = probabilityMutation/1.3
         if(delta < -1500):
             chromosomeList += generateChromosomes(parsedDataset, math.floor(-delta/100))
-        chromosomeList = epidemy(chromosomeList, parsedDataset, fitnessList)
+#        chromosomeList = epidemy(chromosomeList, parsedDataset, fitnessList)
             
     else:
         probabilityMutation = min(pow(probabilityMutation, 0.5), 1.2)
@@ -516,15 +516,14 @@ while(evolve):
                 fitnessList = generateFitnessList(chromosomeList, parsedDataset)
                 chromosomeList = mutateGroup(chromosomeList, fitnessList, probabilityMultipleMutation, True)
 
-    if(distance(bestChromosomes[0], parsedDataset, False) < distance(bestChromosome, parsedDataset, False)):
-        bestChromosome = bestChromosomes[0]
-        chromosomeList.append(bestChromosome)
-        
+#    if(distance(bestChromosomes[0], parsedDataset, False) < distance(bestChromosome, parsedDataset, False)):
+#        chromosomeList.append(bestChromosome)
+    bestChromosome = bestChromosomes[0]
     print(str(count) + " generations (distance: " + str(distance(bestChromosome, parsedDataset, True)) +" and best path: " + str(bestChromosomes[0]) + ")")
     
     fitnessList = generateFitnessList(chromosomeList, parsedDataset)
     chromosomeList = listCrossover(chromosomeList, fitnessList, numElite)  
-    chromosomeList = epidemy(chromosomeList, parsedDataset, fitnessList)
+#    chromosomeList = epidemy(chromosomeList, parsedDataset, fitnessList)
     
     first = 0
     
