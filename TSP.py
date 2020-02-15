@@ -163,28 +163,10 @@ def crossover(parent1, parent2): # source: https://towardsdatascience.com/evolut
     childP2 = [item for item in parent2 if item not in childP1]
 
     child = childP1 + childP2
-        
-    return [child, child]
+       
+    return [child]
 
 
-def oldCrossover(chromosome1, chromosome2):
-    
-    pivot = randrange(len(chromosome1)-2)
-    newChromosome = []
-    
-   
-    for c1 in range(pivot):
-        newChromosome.append(chromosome1[c1])
-        
-    for c2 in range(len(chromosome1)-pivot-1):
-        newChromosome.append(chromosome2[pivot+c2])
-    
-
-            
-    if(isValid(newChromosome) and len(newChromosome) == len(chromosome1)):
-        return [newChromosome, newChromosome]
-    else:
-        return [chromosome1, chromosome2]
     
 def isValid(chromosome):
     baseChromosome = list(range(1, len(chromosome)))
@@ -250,7 +232,7 @@ def listCrossover(chromosomeList, fitnessList, amountCrossover):
             while(found == 0 and s < sMax):
                 s = s+1
                 newChromosomes = crossover(shiftChromosome(chromosomeList[c], s), chromosomeList[c+1])
-                if(newChromosomes[1] != chromosomeList[c+1]):
+                if(newChromosomes[0] != chromosomeList[c+1]):
                     crossList = crossList + newChromosomes
                     found = 1
 #            crossList.append(crossover(chromosomeList[c+1], chromosomeList[c]))
