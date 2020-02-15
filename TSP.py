@@ -59,6 +59,36 @@ def generateGreedyChromosome(startingPoint, ds):
 #    print(greedyChromosome)
     return greedyChromosome
 
+
+def generateAlmostGreedyChromosomes(ds, number):
+    listChromosomes = []
+    
+    for l in range(0, min(1, math.ceil(number/len(ds)))):
+        for k in range(1, len(ds)-1):
+            city = ds[k-1]
+            listChromosomes.append(generateAlmostGreedyChromosome(city.get('num'), ds))
+    
+    return listChromosomes
+
+def generateAlmostGreedyChromosome(startingPoint, ds):
+    numberCities = len(ds)+1
+    baseChromosome = list(range(1, numberCities))
+    greedyChromosome = []
+    
+    greedyChromosome.append(int(startingPoint))
+    baseChromosome.remove(int(startingPoint))
+    
+    for g in range(numberCities-2):
+        randomNumber = min(math.floor(1+min((2.99*random.random()), 2)), len(greedyChromosome))
+        closestPoint = findClosest(greedyChromosome[-randomNumber], baseChromosome, ds)[0]
+        greedyChromosome.append(closestPoint)
+      
+        baseChromosome.remove(int(closestPoint))
+        
+#    print(greedyChromosome)
+    return greedyChromosome
+
+
 def findClosest(element, baseChromosome, ds):
     minDist = float("inf")
     minElem = 0
@@ -403,8 +433,10 @@ filename = askopenfilename() # show an "Open" dialog box and return the path to 
 dataset = open(filename, "r")
 parsedDataset = parseDataset(dataset)
 
-chromosomeList = generateChromosomes(parsedDataset, 60)
-#chromosomeList += generateGreedyChromosomes(parsedDataset, 30)
+chromosomeList = generateChromosomes(parsedDataset, 90)
+chromosomeList += generateGreedyChromosomes(parsedDataset, 30)
+chromosomeList += generateAlmostGreedyChromosomes(parsedDataset, 60)
+
 
 evolve = 1
 
@@ -470,6 +502,11 @@ while(evolve):
             
             if(numDelta0 > 5):
                 probabilityMultipleMutation = probabilityMultipleMutation+0.01*max(3*numDelta0, 50)
+                if(numDelta0 > 15):
+                    probabilityMultipleMutation = probabilityMultipleMutation+0.01*max(4*numDelta0, 70)
+                    if(numDelta0 > 20):
+                        probabilityMultipleMutation = probabilityMultipleMutation+0.01*max(4*numDelta0, 90)
+
                 fitnessList = generateFitnessList(chromosomeList, parsedDataset)
                 chromosomeList = mutateGroup(chromosomeList, fitnessList, probabilityMultipleMutation, True)
 
