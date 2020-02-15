@@ -457,7 +457,7 @@ while(evolve):
         probabilityMutation = probabilityMutation/1.3
             
     else:
-        probabilityMutation = min(pow(probabilityMutation, 0.9), 0.9)
+        probabilityMutation = min(pow(probabilityMutation, 0.4), 1.3)
         
 
         if(numDelta0 > 2):
@@ -471,10 +471,12 @@ while(evolve):
                         probabilityMultipleMutation = probabilityMultipleMutation+0.01*min(2*numDelta0, 25)
                         if(numDelta0 > 30):
                             probabilityMultipleMutation = probabilityMultipleMutation+0.01*min(2*numDelta0, 30)
-
+                chromosomeList += generateAlmostGreedyChromosomes(parsedDataset, numDelta0)
+                chromosomeList += generateChromosomes(parsedDataset, numDelta0)
+                            
                 fitnessList = generateFitnessList(chromosomeList, parsedDataset)
                            
-                chromosomeList = chromosomeList + mutateGroup(chromosomeList, fitnessList, min(probabilityMultipleMutation, 0.9), True)
+                chromosomeList = chromosomeList + mutateGroup(chromosomeList, fitnessList, min(probabilityMultipleMutation, 1), True)
              
     print(str(count) + " generations (distance: " + str(distance(bestChromosomes[0], parsedDataset, True)) +" and best path: " + str(bestChromosomes[0]) + ")")
     
