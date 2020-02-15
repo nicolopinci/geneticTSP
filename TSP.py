@@ -507,7 +507,7 @@ while(evolve):
              
     bestDistance = distance(bestChromosomes[0], parsedDataset, True)
     
-    pygame.display.set_caption(filename.split("/")[-1] + " - distance: " + str(round(bestDistance, 2)) + " - generation " + count)
+    pygame.display.set_caption(filename.split("/")[-1] + " - distance: " + str(round(bestDistance, 2)) + " - generation " + str(count))
     
     print(str(count) + " generations (distance: " + str(bestDistance) +" and best path: " + str(bestChromosomes[0]) + ")")
     
