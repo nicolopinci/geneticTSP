@@ -10,6 +10,8 @@ Source: <http://www.math.uwaterloo.ca/tsp/world/djtour.html>
 * Optimal result: 6656
 * Error: 0.108 %
 
+Note: this result refers to the case in which the greedy chromosomes are create at the beginning of the evolutionary process.
+
 ![Djibouti path using GA](https://raw.githubusercontent.com/nicolopinci/geneticTSP/master/img/djibouti.png "Djibouti path using GA")
 
 <details>

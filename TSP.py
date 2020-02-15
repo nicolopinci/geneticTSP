@@ -157,8 +157,9 @@ def mutation(refChromosome):
 
 def multipleMutation(chromosome, percentage):
     multipleMutatedChromosome = chromosome.copy()
-    for m in range(0, max(math.floor(percentage*len(chromosome)-1), 1)):
+    for m in range(0, max(math.floor(0.05*percentage*len(chromosome)-1), 1)):
         multipleMutatedChromosome = mutation(multipleMutatedChromosome)
+    
     return multipleMutatedChromosome
         
 def crossover(parent1, parent2): # source: https://towardsdatascience.com/evolution-of-a-salesman-a-complete-genetic-algorithm-tutorial-for-python-6fe5d2b3ca35
@@ -270,7 +271,9 @@ def mutateGroup(chromosomeList, fitnessList, amount, multiple):
 
         mutateList.append(chromosomeList[c])
 
-        hitProb = amount*(1/fitnessList[c])/totDist
+#        hitProb = amount*(1/fitnessList[c])/totDist
+        hitProb = 1/len(chromosomeList)
+        
         randomNumber = randrange(1000)/1000
         
         if(hitProb > randomNumber):
@@ -317,7 +320,7 @@ def epidemy(refChromosomeList, parsedDataset, factor):
      
     chromosomeList = refChromosomeList.copy()
     if(len(chromosomeList)>500):
-        chromosomeList = killNWeakest(chromosomeList, parsedDataset, math.floor(len(chromosomeList) - 250 - factor/20))
+        chromosomeList = killNWeakest(chromosomeList, parsedDataset, math.floor(len(chromosomeList) - min(250 + factor/20, 700)))
     return chromosomeList
 
 def distance(chromosome, ds, drawLine):
@@ -409,8 +412,8 @@ dataset = open(filename, "r")
 parsedDataset = parseDataset(dataset)
 
 chromosomeList = generateChromosomes(parsedDataset, 150)
-#chromosomeList += generateGreedyChromosomes(parsedDataset, 30)
-#chromosomeList += generateAlmostGreedyChromosomes(parsedDataset, 30)
+chromosomeList += generateGreedyChromosomes(parsedDataset, 30)
+chromosomeList += generateAlmostGreedyChromosomes(parsedDataset, 150)
 
 
 evolve = 1
@@ -478,21 +481,23 @@ while(evolve):
             probabilityMutation = probabilityMutation*(numDelta0+1)
 
             if(numDelta0 > 5):
-                probabilityMultipleMutation = probabilityMultipleMutation+0.01*min(1.5*numDelta0, 15)
+                probabilityMultipleMutation = probabilityMultipleMutation+0.01*min(0.5*numDelta0, 15)
                 if(numDelta0 > 15):
-                    probabilityMultipleMutation = probabilityMultipleMutation+0.01*min(2*numDelta0, 20)
+                    probabilityMultipleMutation = probabilityMultipleMutation+0.01*min(0.5*numDelta0, 20)
                     if(numDelta0 > 20):
-                        probabilityMultipleMutation = probabilityMultipleMutation+0.01*min(2*numDelta0, 25)
+                        probabilityMultipleMutation = probabilityMultipleMutation+0.01*min(0.5*numDelta0, 25)
+                        chromosomeList += generateChromosomes(parsedDataset, 10*numDelta0)
+                        chromosomeList += generateGreedyChromosomes(parsedDataset, len(parsedDataset))
+                
                         if(numDelta0 > 30):
-                            probabilityMultipleMutation = probabilityMultipleMutation+0.01*min(2*numDelta0, 30)
-                chromosomeList += generateAlmostGreedyChromosomes(parsedDataset, 10*numDelta0)
-                chromosomeList += generateChromosomes(parsedDataset, 10*numDelta0)
-                chromosomeList += generateGreedyChromosomes(parsedDataset, len(parsedDataset))
-
+                            probabilityMultipleMutation = probabilityMultipleMutation+0.01*min(0.5*numDelta0, 30)
                             
+                chromosomeList += generateAlmostGreedyChromosomes(parsedDataset, 10*numDelta0)
+
                 fitnessList = generateFitnessList(chromosomeList, parsedDataset)
                            
-                chromosomeList = chromosomeList + mutateGroup(chromosomeList, fitnessList, min(probabilityMultipleMutation, 1), True)
+                probabilityMultipleMutation = min(probabilityMultipleMutation, 1)
+                chromosomeList = chromosomeList + mutateGroup(chromosomeList, fitnessList, probabilityMultipleMutation, True)
              
     print(str(count) + " generations (distance: " + str(distance(bestChromosomes[0], parsedDataset, True)) +" and best path: " + str(bestChromosomes[0]) + ")")
     
