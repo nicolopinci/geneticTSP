@@ -232,6 +232,12 @@ def listCrossover(chromosomeList, fitnessList, amountCrossover):
             while(found == 0 and s < sMax):
                 s = s+1
                 newChromosomes = crossover(shiftChromosome(chromosomeList[c], s), chromosomeList[c+1])
+                if(chromosomeList[c]==extractBestN(chromosomeList, fitnessList, 1)[0]):
+                    crossList.append(chromosomeList[c])
+                
+                if(chromosomeList[c+1]==extractBestN(chromosomeList, fitnessList, 1)[0]):
+                    crossList.append(chromosomeList[c+1])
+                
                 if(newChromosomes[0] != chromosomeList[c+1]):
                     crossList = crossList + newChromosomes
                     found = 1
@@ -262,11 +268,13 @@ def mutateGroup(chromosomeList, fitnessList, amount, multiple):
         
         if(hitProb > randomNumber):
 #            print("!!!")
-            if(chromosomeList[c]!=extractBestN(chromosomeList, fitnessList, 1)[0]):
-                if(multiple == False):
-                    mutateList.append(mutation(chromosomeList[c]))
-                else:
-                    mutateList.append(multipleMutation(chromosomeList[c], amount))
+            if(chromosomeList[c]==extractBestN(chromosomeList, fitnessList, 1)[0]):
+                mutateList.append(chromosomeList[c])
+            
+            if(multiple == False):
+                mutateList.append(mutation(chromosomeList[c]))
+            else:
+                mutateList.append(multipleMutation(chromosomeList[c], amount))
         
         mutateList.append(chromosomeList[c])
 
@@ -309,7 +317,7 @@ def killWeak(chromosomeList, fitnessList):
     
     return killList
     
-def killNWeakest(chromosomeList, ds, n):
+def killNWeakest(chromosomeList, bigFitnessList, ds, n):
     fitnessList = []
     cleanedList = []
     for c in range(len(chromosomeList)):
@@ -318,12 +326,13 @@ def killNWeakest(chromosomeList, ds, n):
     
     for c in range(len(sortedInd)):
         if(sortedInd[c] > n):
-            cleanedList.append(chromosomeList[sortedInd[c]])
+            if(chromosomeList[sortedInd[c]]!=extractBestN(chromosomeList, bigFitnessList, 1)[0]):
+                cleanedList.append(chromosomeList[sortedInd[c]])
         
     return cleanedList
     
   
-def epidemy(chromosomeList, parsedDataset):
+def epidemy(chromosomeList, parsedDataset, fitnessList):
     
 #    for l in range(0, len(chromosomeList)-1):
 #        s = 0
@@ -333,7 +342,7 @@ def epidemy(chromosomeList, parsedDataset):
 #            s = s+1
         
     if(len(chromosomeList)>500):
-        chromosomeList = killNWeakest(chromosomeList, parsedDataset, len(chromosomeList) - 250)
+        chromosomeList = killNWeakest(chromosomeList, fitnessList, parsedDataset, len(chromosomeList) - 250)
     return chromosomeList
 
 def distance(chromosome, ds, drawLine):
@@ -446,6 +455,7 @@ count = 0
 pygame.init()
 screen = pygame.display.set_mode([500, 500])
 
+bestChromosome = chromosomeList[0]
 
 while(evolve):
     screen.fill((0, 0, 0))
@@ -469,7 +479,7 @@ while(evolve):
 
     if(delta > 50):
         numElite = min(math.floor(len(chromosomeList)*0.5), numElite+math.floor(delta/100))
-        chromosomeList = killNWeakest(chromosomeList, parsedDataset, len(chromosomeList) - max(math.ceil(20000/delta), 100))
+        chromosomeList = killNWeakest(chromosomeList, fitnessList, parsedDataset, len(chromosomeList) - max(math.ceil(20000/delta), 100))
 
         if(numDelta0 > 3):
             probabilityMutation = probabilityMutation*(numDelta0+1)
@@ -482,7 +492,7 @@ while(evolve):
         probabilityMutation = probabilityMutation/1.3
         if(delta < -1500):
             chromosomeList += generateChromosomes(parsedDataset, math.floor(-delta/100))
-        chromosomeList = epidemy(chromosomeList, parsedDataset)
+        chromosomeList = epidemy(chromosomeList, parsedDataset, fitnessList)
             
     else:
         probabilityMutation = min(pow(probabilityMutation, 0.5), 1.2)
@@ -506,12 +516,15 @@ while(evolve):
                 fitnessList = generateFitnessList(chromosomeList, parsedDataset)
                 chromosomeList = mutateGroup(chromosomeList, fitnessList, probabilityMultipleMutation, True)
 
-
-    print(str(count) + " generations (distance: " + str(distance(bestChromosomes[0], parsedDataset, True)) +" and best path: " + str(bestChromosomes[0]) + ")")
+    if(distance(bestChromosomes[0], parsedDataset, False) < distance(bestChromosome, parsedDataset, False)):
+        bestChromosome = bestChromosomes[0]
+        chromosomeList.append(bestChromosome)
+        
+    print(str(count) + " generations (distance: " + str(distance(bestChromosome, parsedDataset, True)) +" and best path: " + str(bestChromosomes[0]) + ")")
     
     fitnessList = generateFitnessList(chromosomeList, parsedDataset)
     chromosomeList = listCrossover(chromosomeList, fitnessList, numElite)  
-    chromosomeList = epidemy(chromosomeList, parsedDataset)
+    chromosomeList = epidemy(chromosomeList, parsedDataset, fitnessList)
     
     first = 0
     
