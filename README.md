@@ -6,9 +6,9 @@ A genetic algorithms approach to solve the travel salesman problem
 
 Source: <http://www.math.uwaterloo.ca/tsp/world/djtour.html>
 
-* Best result using GA: 6663.213801224396 (47 generations)
+* Best result using GA: 6664.113570564627 (47 generations)
 * Optimal result: 6656
-* Error: 0.108 %
+* Error: 0.12 %
 
 Note: this result refers to the case in which the greedy chromosomes are create at the beginning of the evolutionary process.
 
