@@ -413,12 +413,11 @@ filename = askopenfilename() # show an "Open" dialog box and return the path to 
 dataset = open(filename, "r")
 parsedDataset = parseDataset(dataset)
 
-maxChromosomes = math.ceil(min(-pow(len(parsedDataset), 2)/500 + 80, 50))
+maxChromosomes = math.ceil(max(min(-pow(len(parsedDataset), 2)/500 + 80, 50), 2))
 
 chromosomeList = generateChromosomes(parsedDataset, maxChromosomes)
 chromosomeList += generateGreedyChromosomes(parsedDataset, min(len(parsedDataset), maxChromosomes))
 #chromosomeList += generateAlmostGreedyChromosomes(parsedDataset, 4)
-
 
 evolve = 1
 
@@ -435,6 +434,9 @@ first = 1
 
 count = 0
 pygame.init()
+
+pygame.display.set_caption(filename.split("/")[-1] + " - distance: " + str(round(bestDistance, 2)) + " - generation " + count)
+
 screen = pygame.display.set_mode([500, 500])
 
 while(evolve):
@@ -503,7 +505,11 @@ while(evolve):
                 probabilityMultipleMutation = min(probabilityMultipleMutation, 1)
                 chromosomeList = chromosomeList + mutateGroup(chromosomeList, fitnessList, probabilityMultipleMutation, True)
              
-    print(str(count) + " generations (distance: " + str(distance(bestChromosomes[0], parsedDataset, True)) +" and best path: " + str(bestChromosomes[0]) + ")")
+    bestDistance = distance(bestChromosomes[0], parsedDataset, True)
+    
+    pygame.display.set_caption(filename.split("/")[-1] + " - distance: " + str(round(bestDistance, 2)) + " - generation " + count)
+    
+    print(str(count) + " generations (distance: " + str(bestDistance) +" and best path: " + str(bestChromosomes[0]) + ")")
     
     fitnessList = generateFitnessList(chromosomeList, parsedDataset)
     chromosomeList = chromosomeList + listCrossover(chromosomeList, fitnessList, numElite)  
