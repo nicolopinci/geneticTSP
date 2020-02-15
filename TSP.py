@@ -277,7 +277,7 @@ def mutateGroup(chromosomeList, fitnessList, amount, multiple):
         
         randomNumber = randrange(1000)/1000
         
-        if(hitProb > randomNumber):
+        if(hitProb > randomNumber or 1/fitnessList[c] > 5*totDist/len(chromosomeList)):
             if(multiple == False):
                 mutateList.append(mutation(chromosomeList[c]))
             else:
