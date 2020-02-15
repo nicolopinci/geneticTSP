@@ -420,7 +420,7 @@ while(evolve):
     count = count + 1
     screen.fill((0, 0, 0))
         
-    probabilityMutation = min(0.9, probabilityMutation)
+    probabilityMutation = min(1, probabilityMutation)
     
     fitnessList = generateFitnessList(chromosomeList, parsedDataset)
         
@@ -471,8 +471,8 @@ while(evolve):
                         probabilityMultipleMutation = probabilityMultipleMutation+0.01*min(2*numDelta0, 25)
                         if(numDelta0 > 30):
                             probabilityMultipleMutation = probabilityMultipleMutation+0.01*min(2*numDelta0, 30)
-                chromosomeList += generateAlmostGreedyChromosomes(parsedDataset, numDelta0)
-                chromosomeList += generateChromosomes(parsedDataset, numDelta0)
+                chromosomeList += generateAlmostGreedyChromosomes(parsedDataset, 10*numDelta0)
+                chromosomeList += generateChromosomes(parsedDataset, 10*numDelta0)
                             
                 fitnessList = generateFitnessList(chromosomeList, parsedDataset)
                            
