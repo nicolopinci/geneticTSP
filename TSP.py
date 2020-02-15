@@ -435,7 +435,7 @@ first = 1
 count = 0
 pygame.init()
 
-pygame.display.set_caption(filename.split("/")[-1] + " - distance: " + str(round(bestDistance, 2)) + " - generation " + count)
+pygame.display.set_caption(filename.split("/")[-1])
 
 screen = pygame.display.set_mode([500, 500])
 
