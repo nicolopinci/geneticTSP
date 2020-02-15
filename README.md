@@ -10,7 +10,7 @@ Source: <http://www.math.uwaterloo.ca/tsp/world/djtour.html>
 * Optimal result: 6656
 * Error: 0.108 %
 
-![Djibouti path using GA][https://github.com/nicolopinci/geneticTSP/tree/master/img/djibouti.png]
+![Djibouti path using GA](https://github.com/nicolopinci/geneticTSP/tree/master/img/djibouti.png "Djibouti path using GA")
 
 <details>
   <summary>Show the results</summary>
