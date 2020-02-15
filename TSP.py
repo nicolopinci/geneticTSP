@@ -74,13 +74,27 @@ def generateAlmostGreedyChromosome(startingPoint, ds):
     numberCities = len(ds)+1
     baseChromosome = list(range(1, numberCities))
     greedyChromosome = []
+    closestPoint = -1
     
     greedyChromosome.append(int(startingPoint))
     baseChromosome.remove(int(startingPoint))
     
     for g in range(numberCities-2):
-        randomNumber = min(math.floor(1+min((2.99*random.random()), 2)), len(greedyChromosome))
-        closestPoint = findClosest(greedyChromosome[-randomNumber], baseChromosome, ds)[0]
+        randomValue = random.random()
+        scaledRandom = 1
+        if(randomValue > 0.9):
+            scaledRandom = 1
+        else:
+            scaledRandom = 2
+                
+        firstClosest = findClosest(greedyChromosome[-1], baseChromosome, ds)[0]
+        secondClosest = findClosest(firstClosest, baseChromosome, ds)[0]
+        
+        if(scaledRandom == 1 or len(greedyChromosome) == 1):
+            closestPoint = firstClosest
+        else:
+            closestPoint = secondClosest
+            
         greedyChromosome.append(closestPoint)
       
         baseChromosome.remove(int(closestPoint))
@@ -299,11 +313,11 @@ def killNWeakest(chromosomeList, ds, n):
     return toBeSaved
     
 
-def epidemy(refChromosomeList, parsedDataset):
+def epidemy(refChromosomeList, parsedDataset, factor):
      
     chromosomeList = refChromosomeList.copy()
     if(len(chromosomeList)>500):
-        chromosomeList = killNWeakest(chromosomeList, parsedDataset, len(chromosomeList) - 250)
+        chromosomeList = killNWeakest(chromosomeList, parsedDataset, math.floor(len(chromosomeList) - 250 - factor/20))
     return chromosomeList
 
 def distance(chromosome, ds, drawLine):
@@ -394,9 +408,9 @@ filename = askopenfilename() # show an "Open" dialog box and return the path to 
 dataset = open(filename, "r")
 parsedDataset = parseDataset(dataset)
 
-chromosomeList = generateChromosomes(parsedDataset, 120)
-chromosomeList += generateGreedyChromosomes(parsedDataset, 30)
-chromosomeList += generateAlmostGreedyChromosomes(parsedDataset, 30)
+chromosomeList = generateChromosomes(parsedDataset, 150)
+#chromosomeList += generateGreedyChromosomes(parsedDataset, 30)
+#chromosomeList += generateAlmostGreedyChromosomes(parsedDataset, 30)
 
 
 evolve = 1
@@ -435,7 +449,7 @@ while(evolve):
 #    print(distance(extractBestN(chromosomeList, fitnessList, 1)[0], parsedDataset, False))
 #    
 #    
-    bestChromosomes = extractBestN(chromosomeList, fitnessList, max(2, math.ceil(len(chromosomeList)/2)))
+    bestChromosomes = extractBestN(chromosomeList, fitnessList, max(2, math.ceil(len(chromosomeList)/1)))
         
     bestChromosomeBefore = bestChromosomeAfter
     bestChromosomeAfter = distance(bestChromosomes[0], parsedDataset, False)
@@ -473,6 +487,8 @@ while(evolve):
                             probabilityMultipleMutation = probabilityMultipleMutation+0.01*min(2*numDelta0, 30)
                 chromosomeList += generateAlmostGreedyChromosomes(parsedDataset, 10*numDelta0)
                 chromosomeList += generateChromosomes(parsedDataset, 10*numDelta0)
+                chromosomeList += generateGreedyChromosomes(parsedDataset, len(parsedDataset))
+
                             
                 fitnessList = generateFitnessList(chromosomeList, parsedDataset)
                            
@@ -482,7 +498,8 @@ while(evolve):
     
     fitnessList = generateFitnessList(chromosomeList, parsedDataset)
     chromosomeList = chromosomeList + listCrossover(chromosomeList, fitnessList, numElite)  
-    chromosomeList = epidemy(chromosomeList, parsedDataset)
+    factor = numDelta0 * count
+    chromosomeList = epidemy(chromosomeList, parsedDataset, factor)
     
     first = 0
     
