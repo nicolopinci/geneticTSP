@@ -1,7 +1,10 @@
 # geneticTSP
-A genetic algorithms approach to solve the travel salesman problem
+A genetic algorithms approach to solve the travel salesman problem.
 
 ## Case studies
+
+Note: the difference in the result (optimal vs GA) can be caused by numerical errors (In the TSPLIB norm, the travel cost between each pair of cities is the Euclidean distance between the points rounded to the nearest integer (not the distance rounded to two decimal places). Source: <https://cs.stackexchange.com/questions/56597/tsp-problem-with-a-benchmark-data>. Since the fitness is calculated as 1/distance, this can create some differences. Another possibility can be that a large amount of points in a small space can be very unlikely to be spotted by the algorithm.
+
 ### Djibouti (38 cities)
 
 Source: <http://www.math.uwaterloo.ca/tsp/world/djtour.html>
@@ -9,8 +12,6 @@ Source: <http://www.math.uwaterloo.ca/tsp/world/djtour.html>
 * Best result using GA: 6659.431532931466 (25 generations, kept until generation 120, then stopped)
 * Optimal result: 6656
 * Error: 0.05 %
-
-Note: the difference in the first result can be caused by numerical errors (In the TSPLIB norm, the travel cost between each pair of cities is the Euclidean distance between the points rounded to the nearest integer (not the distance rounded to two decimal places). Source: <https://cs.stackexchange.com/questions/56597/tsp-problem-with-a-benchmark-data>). Since the fitness is calculated as 1/distance, this can create some differences.
 
 ![Djibouti path using GA](https://raw.githubusercontent.com/nicolopinci/geneticTSP/master/img/djibouti.png "Djibouti path using GA")
 
@@ -57,8 +58,6 @@ Source: <http://www.math.uwaterloo.ca/tsp/world/witour.html>
 * Best result using GA: 27601.173774493756 (44 generations)
 * Optimal result: 27603
 * Error: 0 %
-
-Note: the difference in the result can be caused by numerical errors (In the TSPLIB norm, the travel cost between each pair of cities is the Euclidean distance between the points rounded to the nearest integer (not the distance rounded to two decimal places). Source: <https://cs.stackexchange.com/questions/56597/tsp-problem-with-a-benchmark-data>. Since the fitness is calculated as 1/distance, this can create some differences.
 
 ![Sahara path using GA](https://raw.githubusercontent.com/nicolopinci/geneticTSP/master/img/sahara.png "Sahara path using GA")
 

@@ -37,7 +37,8 @@ def generateGreedyChromosomes(ds, number):
     
     number = min(number, len(ds))
     for k in range(1, number):
-        city = ds[k-1]
+        index = randrange(1, number)
+        city = ds[index-1]
         listChromosomes.append(generateGreedyChromosome(city.get('num'), ds))
     
     return listChromosomes
@@ -321,7 +322,7 @@ def epidemy(refChromosomeList, parsedDataset, factor):
      
     chromosomeList = refChromosomeList.copy()
     if(len(chromosomeList)>500):
-        chromosomeList = killNWeakest(chromosomeList, parsedDataset, math.floor(len(chromosomeList) - min(250 + factor/20, 700)))
+        chromosomeList = killNWeakest(chromosomeList, parsedDataset, math.floor(len(chromosomeList) - min(250 + factor/20, 500)))
     return chromosomeList
 
 def distance(chromosome, ds, drawLine):
@@ -402,7 +403,7 @@ def distance(chromosome, ds, drawLine):
 
 #        pygame.display.update()
 
-    return round(dist)
+    return dist
     
 amountCrossover = 0
 # Upload a file
@@ -412,9 +413,11 @@ filename = askopenfilename() # show an "Open" dialog box and return the path to 
 dataset = open(filename, "r")
 parsedDataset = parseDataset(dataset)
 
-chromosomeList = generateChromosomes(parsedDataset, 150)
-chromosomeList += generateGreedyChromosomes(parsedDataset, 30)
-chromosomeList += generateAlmostGreedyChromosomes(parsedDataset, 150)
+maxChromosomes = math.ceil(min(-pow(len(parsedDataset), 2)/500 + 80, 50))
+
+chromosomeList = generateChromosomes(parsedDataset, maxChromosomes)
+chromosomeList += generateGreedyChromosomes(parsedDataset, min(len(parsedDataset), maxChromosomes))
+#chromosomeList += generateAlmostGreedyChromosomes(parsedDataset, 4)
 
 
 evolve = 1
@@ -487,13 +490,13 @@ while(evolve):
                     probabilityMultipleMutation = probabilityMultipleMutation+0.01*min(0.5*numDelta0, 20)
                     if(numDelta0 > 20):
                         probabilityMultipleMutation = probabilityMultipleMutation+0.01*min(0.5*numDelta0, 25)
-                        chromosomeList += generateChromosomes(parsedDataset, 10*numDelta0)
-                        chromosomeList += generateGreedyChromosomes(parsedDataset, len(parsedDataset))
+                        chromosomeList += generateChromosomes(parsedDataset, maxChromosomes)
+                        chromosomeList += generateGreedyChromosomes(parsedDataset, 4)
                 
                         if(numDelta0 > 30):
                             probabilityMultipleMutation = probabilityMultipleMutation+0.01*min(0.5*numDelta0, 30)
                             
-                chromosomeList += generateAlmostGreedyChromosomes(parsedDataset, 10*numDelta0)
+                chromosomeList += generateAlmostGreedyChromosomes(parsedDataset, maxChromosomes)
 
                 fitnessList = generateFitnessList(chromosomeList, parsedDataset)
                            
