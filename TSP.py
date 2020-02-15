@@ -272,7 +272,8 @@ def mutateGroup(chromosomeList, fitnessList, amount, multiple):
         mutateList.append(chromosomeList[c])
 
 #        hitProb = amount*(1/fitnessList[c])/totDist
-        hitProb = 1/len(chromosomeList)
+#        hitProb = 1/len(chromosomeList)
+        hitProb = amount*fitnessList[c]*totDist
         
         randomNumber = randrange(1000)/1000
         
