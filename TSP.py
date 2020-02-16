@@ -523,6 +523,6 @@ while(evolve):
     remainingGreedy = 2
     maxChromosomes = max(100, math.floor(maxChromosomes*count/10))
     
-    probabilityMultipleMutation = count*probabilityMultipleMutation/100
+    probabilityMultipleMutation = max(count*probabilityMultipleMutation/15, probabilityMultipleMutation)
     
 pygame.quit()
