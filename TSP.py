@@ -414,16 +414,17 @@ dataset = open(filename, "r")
 parsedDataset = parseDataset(dataset)
 
 maxChromosomes = math.ceil(max(min(-pow(len(parsedDataset), 2)/500 + 60, 50), 2))
-maxGreedy = min(max(-len(parsedDataset) + 75, 2), len(parsedDataset))
+#maxGreedy = min(max(-len(parsedDataset) + 75, 2), len(parsedDataset))
+maxGreedy = 0
 
 print("Generating the random chromosomes...")
 chromosomeList = generateChromosomes(parsedDataset, maxChromosomes)
 
 print("Generating the greedy chromosomes...")
-chromosomeList += generateGreedyChromosomes(parsedDataset, min(len(parsedDataset), maxGreedy))
+#chromosomeList += generateGreedyChromosomes(parsedDataset, min(len(parsedDataset), maxGreedy))
 
 print("Generate the stochastic greedy chromosomes...")
-chromosomeList += generateAlmostGreedyChromosomes(parsedDataset, min(len(parsedDataset), maxGreedy))
+#chromosomeList += generateAlmostGreedyChromosomes(parsedDataset, min(len(parsedDataset), maxGreedy))
 
 remainingGreedy = max(len(parsedDataset) - maxGreedy, 2)
 
