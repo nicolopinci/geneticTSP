@@ -416,8 +416,6 @@ parsedDataset = parseDataset(dataset)
 maxChromosomes = math.ceil(max(min(-pow(len(parsedDataset), 2)/500 + 80, 50), 2))
 maxGreedy = min(max(-len(parsedDataset) + 60, 2), len(parsedDataset))
 
-print(maxGreedy)
-
 chromosomeList = generateChromosomes(parsedDataset, maxChromosomes)
 chromosomeList += generateGreedyChromosomes(parsedDataset, min(len(parsedDataset), maxGreedy))
 chromosomeList += generateAlmostGreedyChromosomes(parsedDataset, maxGreedy)
@@ -523,5 +521,8 @@ while(evolve):
     
     first = 0
     remainingGreedy = 2
+    maxChromosomes = max(100, math.floor(maxChromosomes*count/10))
+    
+    probabilityMultipleMutation = count*probabilityMultipleMutation/100
     
 pygame.quit()
