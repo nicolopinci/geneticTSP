@@ -414,10 +414,15 @@ dataset = open(filename, "r")
 parsedDataset = parseDataset(dataset)
 
 maxChromosomes = math.ceil(max(min(-pow(len(parsedDataset), 2)/500 + 80, 50), 2))
+maxGreedy = min(max(-len(parsedDataset) + 60, 2), len(parsedDataset))
+
+print(maxGreedy)
 
 chromosomeList = generateChromosomes(parsedDataset, maxChromosomes)
-chromosomeList += generateGreedyChromosomes(parsedDataset, min(len(parsedDataset), maxChromosomes))
-#chromosomeList += generateAlmostGreedyChromosomes(parsedDataset, 4)
+chromosomeList += generateGreedyChromosomes(parsedDataset, min(len(parsedDataset), maxGreedy))
+chromosomeList += generateAlmostGreedyChromosomes(parsedDataset, maxGreedy)
+
+remainingGreedy = max(len(parsedDataset) - maxGreedy, 2)
 
 evolve = 1
 
@@ -493,12 +498,12 @@ while(evolve):
                     if(numDelta0 > 20):
                         probabilityMultipleMutation = probabilityMultipleMutation+0.01*min(0.5*numDelta0, 25)
                         chromosomeList += generateChromosomes(parsedDataset, maxChromosomes)
-#                        chromosomeList += generateGreedyChromosomes(parsedDataset, 4)
+                        chromosomeList += generateGreedyChromosomes(parsedDataset, remainingGreedy)
                 
                         if(numDelta0 > 30):
                             probabilityMultipleMutation = probabilityMultipleMutation+0.01*min(0.5*numDelta0, 30)
                             
-#                chromosomeList += generateAlmostGreedyChromosomes(parsedDataset, maxChromosomes)
+                chromosomeList += generateAlmostGreedyChromosomes(parsedDataset, maxGreedy)
 
                 fitnessList = generateFitnessList(chromosomeList, parsedDataset)
                            
@@ -517,5 +522,6 @@ while(evolve):
     chromosomeList = epidemy(chromosomeList, parsedDataset, factor)
     
     first = 0
+    remainingGreedy = 2
     
 pygame.quit()
