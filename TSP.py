@@ -447,6 +447,8 @@ pygame.display.set_caption(filename.split("/")[-1])
 
 screen = pygame.display.set_mode([500, 500])
 
+deltaThreshold = 1
+
 print("Starting evolution...")
 while(evolve):
     count = count + 1
@@ -474,12 +476,12 @@ while(evolve):
     
     delta = bestChromosomeBefore - bestChromosomeAfter
 
-    if(delta <= 100):
+    if(delta <= deltaThreshold):
         numDelta0 = numDelta0 + 1
     else:
         numDelta0 = 0
 
-    if(delta > 50):
+    if(delta > deltaThreshold):
              
         chromosomeList = killNWeakest(chromosomeList, parsedDataset, len(chromosomeList) - max(math.ceil(20000/delta), 100))
 
@@ -495,17 +497,17 @@ while(evolve):
         if(numDelta0 > 1):
             probabilityMutation = probabilityMutation*(numDelta0+1)
 
-            if(numDelta0 > 3):
+            if(numDelta0 > 2):
                 probabilityMultipleMutation = probabilityMultipleMutation+0.01*min(0.5*numDelta0, 15)
-                if(numDelta0 > 10):
+                if(numDelta0 > 3):
                     probabilityMultipleMutation = probabilityMultipleMutation+0.01*min(0.5*numDelta0, 20)
-                    if(numDelta0 > 20):
+                    if(numDelta0 > 4):
                         probabilityMultipleMutation = probabilityMultipleMutation+0.01*min(0.5*numDelta0, 25)
                         chromosomeList += generateChromosomes(parsedDataset, maxChromosomes)
                         chromosomeList += generateGreedyChromosomes(parsedDataset, min(remainingGreedy, maxChromosomes))
                         remainingGreedy = max((remainingGreedy - min(remainingGreedy, maxChromosomes)), 2)
 
-                        if(numDelta0 > 30):
+                        if(numDelta0 > 5):
                             probabilityMultipleMutation = probabilityMultipleMutation+0.01*min(0.5*numDelta0, 30)
                             
                 chromosomeList += generateAlmostGreedyChromosomes(parsedDataset, max(math.floor(math.sqrt(maxChromosomes)), 1))
@@ -530,5 +532,7 @@ while(evolve):
     maxChromosomes = min(100, math.floor(maxChromosomes*count/10))
     
     probabilityMultipleMutation = max(count*probabilityMultipleMutation/15, probabilityMultipleMutation)
+    
+    deltaThreshold = max(0.01 * bestDistance, 1)
     
 pygame.quit()
