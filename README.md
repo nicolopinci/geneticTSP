@@ -13,9 +13,9 @@ Some of the chromosomes are initially generated using a greedy algorithm (NN), w
 
 Source: <http://www.math.uwaterloo.ca/tsp/world/qatour.html>
 
-* Best result using GA: 10767.77397374803 (158 generations)
+* Best result using GA: 10741.534178682168 (66 generations)
 * Optimal result: 9352
-* Error: 15.14 %
+* Error: 14.86 %
 
 ![Qatar path using GA](https://raw.githubusercontent.com/nicolopinci/geneticTSP/master/img/qatar.png "Qatar path using GA")
 
