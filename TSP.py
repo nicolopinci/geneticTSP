@@ -493,12 +493,12 @@ while(evolve):
                     if(numDelta0 > 20):
                         probabilityMultipleMutation = probabilityMultipleMutation+0.01*min(0.5*numDelta0, 25)
                         chromosomeList += generateChromosomes(parsedDataset, maxChromosomes)
-                        chromosomeList += generateGreedyChromosomes(parsedDataset, 4)
+#                        chromosomeList += generateGreedyChromosomes(parsedDataset, 4)
                 
                         if(numDelta0 > 30):
                             probabilityMultipleMutation = probabilityMultipleMutation+0.01*min(0.5*numDelta0, 30)
                             
-                chromosomeList += generateAlmostGreedyChromosomes(parsedDataset, maxChromosomes)
+#                chromosomeList += generateAlmostGreedyChromosomes(parsedDataset, maxChromosomes)
 
                 fitnessList = generateFitnessList(chromosomeList, parsedDataset)
                            
