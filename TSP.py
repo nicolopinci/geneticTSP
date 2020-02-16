@@ -533,6 +533,6 @@ while(evolve):
     
     probabilityMultipleMutation = max(count*probabilityMultipleMutation/15, probabilityMultipleMutation)
     
-    deltaThreshold = max(0.01 * bestDistance, 1)
+    deltaThreshold = max(10*math.log(bestDistance+1, 3), 1)
     
 pygame.quit()
