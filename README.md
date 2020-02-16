@@ -5,6 +5,10 @@ A genetic algorithms approach to solve the travel salesman problem.
 
 Note: the difference in the result (optimal vs GA) can be caused by numerical errors (In the TSPLIB norm, the travel cost between each pair of cities is the Euclidean distance between the points rounded to the nearest integer (not the distance rounded to two decimal places). Source: <https://cs.stackexchange.com/questions/56597/tsp-problem-with-a-benchmark-data>. Since the fitness is calculated as 1/distance, this can create some differences. Another possibility can be that a large amount of points in a small space can be very unlikely to be spotted by the algorithm.
 
+### Generation of the chromosomes
+
+Some of the chromosomes are initially generated using a greedy algorithm (NN), while others are generated randomly and others are created using a greedy strategy with a randomized behaviour. The number of chromosomes depends on the size of the dataset (the number of cities) in order to avoid high computational times in case there are many cities.
+
 ### Qatar (194 cities)
 
 Source: <http://www.math.uwaterloo.ca/tsp/world/qatour.html>
@@ -288,3 +292,8 @@ Source: <http://www.math.uwaterloo.ca/tsp/world/witour.html>
 44 generations (distance: 27601.173774493756 and best path: [13, 9, 7, 3, 4, 8, 5, 1, 2, 6, 10, 11, 12, 15, 19, 18, 17, 21, 22, 23, 29, 28, 26, 20, 25, 27, 24, 16, 14])
 ```
 </details>
+
+
+### Simple sample
+
+The simple sample consists of only 6 points and it is usually solved by the greedy + random initialization procedure.

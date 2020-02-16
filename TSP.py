@@ -64,10 +64,10 @@ def generateGreedyChromosome(startingPoint, ds):
 def generateAlmostGreedyChromosomes(ds, number):
     listChromosomes = []
     
-    for l in range(0, min(1, math.ceil(number/len(ds)))):
-        for k in range(1, len(ds)-1):
-            city = ds[k-1]
-            listChromosomes.append(generateAlmostGreedyChromosome(city.get('num'), ds))
+    for l in range(0, max(1, math.ceil(number/len(ds)))):
+#        for k in range(1, len(ds)-1):
+        city = ds[randrange(0, len(ds)-1)]
+        listChromosomes.append(generateAlmostGreedyChromosome(city.get('num'), ds))
     
     return listChromosomes
 
@@ -413,12 +413,17 @@ filename = askopenfilename() # show an "Open" dialog box and return the path to 
 dataset = open(filename, "r")
 parsedDataset = parseDataset(dataset)
 
-maxChromosomes = math.ceil(max(min(-pow(len(parsedDataset), 2)/500 + 80, 50), 2))
-maxGreedy = min(max(-len(parsedDataset) + 60, 2), len(parsedDataset))
+maxChromosomes = math.ceil(max(min(-pow(len(parsedDataset), 2)/500 + 60, 50), 2))
+maxGreedy = min(max(-len(parsedDataset) + 75, 2), len(parsedDataset))
 
+print("Generating the random chromosomes...")
 chromosomeList = generateChromosomes(parsedDataset, maxChromosomes)
+
+print("Generating the greedy chromosomes...")
 chromosomeList += generateGreedyChromosomes(parsedDataset, min(len(parsedDataset), maxGreedy))
-chromosomeList += generateAlmostGreedyChromosomes(parsedDataset, maxGreedy)
+
+print("Generate the stochastic greedy chromosomes...")
+chromosomeList += generateAlmostGreedyChromosomes(parsedDataset, max(math.floor(math.sqrt(maxChromosomes)), 1))
 
 remainingGreedy = max(len(parsedDataset) - maxGreedy, 2)
 
@@ -442,6 +447,7 @@ pygame.display.set_caption(filename.split("/")[-1])
 
 screen = pygame.display.set_mode([500, 500])
 
+print("Starting evolution...")
 while(evolve):
     count = count + 1
     screen.fill((0, 0, 0))
@@ -486,22 +492,23 @@ while(evolve):
         probabilityMutation = min(pow(probabilityMutation, 0.4), 1.3)
         
 
-        if(numDelta0 > 2):
+        if(numDelta0 > 1):
             probabilityMutation = probabilityMutation*(numDelta0+1)
 
-            if(numDelta0 > 5):
+            if(numDelta0 > 3):
                 probabilityMultipleMutation = probabilityMultipleMutation+0.01*min(0.5*numDelta0, 15)
-                if(numDelta0 > 15):
+                if(numDelta0 > 10):
                     probabilityMultipleMutation = probabilityMultipleMutation+0.01*min(0.5*numDelta0, 20)
                     if(numDelta0 > 20):
                         probabilityMultipleMutation = probabilityMultipleMutation+0.01*min(0.5*numDelta0, 25)
                         chromosomeList += generateChromosomes(parsedDataset, maxChromosomes)
-                        chromosomeList += generateGreedyChromosomes(parsedDataset, remainingGreedy)
-                
+                        chromosomeList += generateGreedyChromosomes(parsedDataset, min(remainingGreedy, maxChromosomes))
+                        remainingGreedy = max((remainingGreedy - min(remainingGreedy, maxChromosomes)), 2)
+
                         if(numDelta0 > 30):
                             probabilityMultipleMutation = probabilityMultipleMutation+0.01*min(0.5*numDelta0, 30)
                             
-                chromosomeList += generateAlmostGreedyChromosomes(parsedDataset, maxGreedy)
+                chromosomeList += generateAlmostGreedyChromosomes(parsedDataset, max(math.floor(math.sqrt(maxChromosomes)), 1))
 
                 fitnessList = generateFitnessList(chromosomeList, parsedDataset)
                            
@@ -520,7 +527,6 @@ while(evolve):
     chromosomeList = epidemy(chromosomeList, parsedDataset, factor)
     
     first = 0
-    remainingGreedy = 2
     maxChromosomes = min(100, math.floor(maxChromosomes*count/10))
     
     probabilityMultipleMutation = max(count*probabilityMultipleMutation/15, probabilityMultipleMutation)
