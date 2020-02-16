@@ -521,7 +521,7 @@ while(evolve):
     
     first = 0
     remainingGreedy = 2
-    maxChromosomes = max(100, math.floor(maxChromosomes*count/10))
+    maxChromosomes = min(100, math.floor(maxChromosomes*count/10))
     
     probabilityMultipleMutation = max(count*probabilityMultipleMutation/15, probabilityMultipleMutation)
     
